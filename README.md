@@ -12,14 +12,17 @@ This guide is for developers who want to build mods that run inside Mangose. It 
 
 - A mod runs inside an isolated `iframe`.
 - Your UI is not rendered directly in the mod’s DOM. Instead, you send a UI tree description built from Mangose components.
-- The host renders that UI, enforces safety rules (for example, it strips unsafe attributes like `style`), and diffs updates efficiently.
 - In practice: build UI with `MangoseMod.*` factories and only send updates for what changed.
 
 ## 1. Prerequisites
 
-- You can run a simple HTML page (locally or hosted).
-- You can write basic JavaScript.
-- You have a place in Mangose where you can paste a mod URL (for example, a developer screen or an integration setting, depending on the app version).
+- You can run a simple HTML page
+- You can write basic JavaScript
+
+> To add a new mod in Mangose, create a new view and choose **Design editor**. Then pick one of the available mods from the list.
+
+> If you’re building your own mod, select **Empty Mod**. Next, open the mod in the new window and click the **gear icon** to open settings. From there, you can either:
+> Enter your GitHub repository, or paste a direct URL to a hosted mod (for example, a mod running on `localhost` during development).
 
 ## 2. Hello world: a counter
 
