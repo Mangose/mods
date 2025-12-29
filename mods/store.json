@@ -1,0 +1,11 @@
+{
+  "mods": [
+    {
+      "name": "example-mod",
+      "friendly-name": "Example Mod",
+      "description": "This is example mangose mod",
+      "version": "1.0",
+      "author": "Magda"
+    }
+  ]
+}
