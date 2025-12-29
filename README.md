@@ -6,26 +6,26 @@ This is the official Mangose Mods SDK tutorial.
 
 # Tutorial: Build Your First Mangose Mod
 
-This guide is for developers who want to build mods on that runs inside Mangose. It walks you from zero to a working mods with a button, basic state, and host API calls.
+This guide is for developers who want to build mods that run inside Mangose. It takes you from zero to a working mod with a button, basic state, and host API calls.
 
 ## Before you start
 
-- A mods runs inside an isolated `iframe`.
-- Your UI is not rendered directly in the mod DOM. Instead, you send a UI tree description built from Mangose components.
-- The host renders that UI, enforces safety rules (for example it strips unsafe attributes such as `style`), and performs diffing.
+- A mod runs inside an isolated `iframe`.
+- Your UI is not rendered directly in the mod’s DOM. Instead, you send a UI tree description built from Mangose components.
+- The host renders that UI, enforces safety rules (for example, it strips unsafe attributes like `style`), and diffs updates efficiently.
 - In practice: build UI with `MangoseMod.*` factories and only send updates for what changed.
 
 ## 1. Prerequisites
 
 - You can run a simple HTML page (locally or hosted).
 - You can write basic JavaScript.
-- You have a place in Mangose where you can paste a mod URL (for example a developer screen or integration configuration, depending on the app version).
+- You have a place in Mangose where you can paste a mod URL (for example, a developer screen or an integration setting, depending on the app version).
 
 ## 2. Hello world: a counter
 
 1. Create a file named `index.html`.
 2. Paste the code below.
-3. Serve it (local server, GitHub Pages, any hosting) and provide the URL in Mangose.
+3. Serve it (a local server, GitHub Pages, or any hosting) and paste the URL into Mangose.
 
 ```html
 <!DOCTYPE html>
@@ -73,7 +73,7 @@ This guide is for developers who want to build mods on that runs inside Mangose.
 
 Key points:
 
-- Any element you want to update should have a stable `mId` (the first argument, for example `counter-value`).
+- Any node you plan to update must have a stable `mId` (the first argument, for example `counter-value`).
 - `render(...)` sends the initial UI tree.
 - `update(...)` sends only changed nodes. The host replaces nodes by `mId`.
 
@@ -87,30 +87,30 @@ If you build your mod as an npm project:
 npm install @mangose/mod-runtime
 ```
 
-Module import:
+Import the runtime:
 
 ```js
 import { MangoseMod } from '@mangose/mod-runtime'
 ```
 
-If you prefer a single HTML file (as above), you can import from the CDN:
+If you prefer a single HTML file (as shown above), you can import from the CDN:
 
-```html
-<script type="module" src="https://cdn.mangose.dev/mod-runtime.js"></script>
+```js
+import { MangoseMod } from 'https://cdn.mangose.app/mod-runtime.js'
 ```
 
 ### Core APIs
 
 - `MangoseMod.onReady(handler)`
-  - Fired when the host is ready. Render your initial UI tree here.
+  - Called when the host is ready. Render your initial UI tree here.
 - `MangoseMod.onEvent(event, handler)`
-  - Subscribe to a single UI event (use the name without the `event:` prefix).
+  - Subscribes to a single UI event. Use the event name without the `event:` prefix.
 - `MangoseMod.onEvents(items)`
-  - Register multiple events at once. `items` can be an array of tuples `[event, handler]` or an object mapping event names to handlers.
+  - Registers multiple events at once. `items` can be an array of tuples (`[event, handler]`) or an object that maps event names to handlers.
 - `MangoseMod.render(node)`
   - Sends the initial UI tree to the host.
 - `MangoseMod.update(...nodes)`
-  - Sends incremental UI updates. You can send multiple nodes in one call.
+  - Sends incremental UI updates. You can send multiple nodes in a single call.
 - `MangoseMod.<Component>([id], [props], [children])`
   - Factory functions for building UI nodes.
 
@@ -129,31 +129,31 @@ Container('box', [Text({ value: 'Child' })])
 - `MangoseMod.openTask(id)`
   - Opens a task in the main UI. Pass `null` to close the task view.
 - `MangoseMod.createTask(taskName, sectionId)`
-  - Creates a task in a given section. Returns the operation result (for example the created task object).
+  - Creates a task in a given section. Returns the operation result (for example, the created task object).
 - `MangoseMod.sections()`
-  - Returns the list of sections for the current collection/view.
+  - Returns the list of sections for the current collection or view.
 - `MangoseMod.getTaskInSection(sectionId)`
   - Returns tasks that belong to the given section.
 - `MangoseMod.content()`
-  - Returns additional collection content (for example a description).
+  - Returns additional collection content (for example, a description).
 - `MangoseMod.setContent(value)`
   - Updates the collection content.
 - `MangoseMod.getCollection()`
-  - Returns metadata for the current collection (name, ids, settings).
+  - Returns metadata for the current collection (name, IDs, settings).
 - `MangoseMod.getProps()`
-  - Returns view/module configuration properties exposed to the mod.
+  - Returns view or module configuration properties exposed to the mod.
 
 ## 5. Events: wiring clicks and form changes
 
 ### Clicks
 
-Set the event name as a string (without a prefix) on the component prop, for example:
+Set the event name as a string (without a prefix) on the component prop:
 
 ```js
 Button('save', { theme: 'primary', onClick: 'save' }, 'Save')
 ```
 
-Then subscribe in your mod using `MangoseMod.onEvent('save', handler)` (the runtime will prefix it internally):
+Then subscribe in your mod using `MangoseMod.onEvent('save', handler)`:
 
 ```js
 MangoseMod.onEvent('save', () => {
@@ -183,8 +183,12 @@ const ui = () =>
     Text('preview', { value: `Typed: ${state.name}` }),
   ])
 
+MangoseMod.onReady(() => {
+  MangoseMod.render(ui())
+})
+
 MangoseMod.onEvent('nameChanged', (payload) => {
-  // The host usually sends a primitive value or an object with `value`
+  // The host usually sends a primitive value or an object with `value`.
   const next = typeof payload === 'string' ? payload : payload?.value
   state.name = next ?? ''
 
@@ -198,17 +202,19 @@ You can register several handlers in one call:
 
 ```js
 MangoseMod.onEvents([
-  ['ping', () => console.log('ping sent')],
-  {
-    confirm: handleConfirm,
-    cancel: handleCancel,
-  },
+  ['ping', () => console.log('ping')],
+  ['save', () => console.log('save')],
 ])
+
+MangoseMod.onEvents({
+  confirm: handleConfirm,
+  cancel: handleCancel,
+})
 ```
 
 ## 6. UI updates: simple rules that save time
 
-- Use stable `mId`s for dynamic elements.
+- Use stable `mId`s for dynamic nodes.
 - Generate UI from state.
 - Update only what changed.
 - Sending multiple updates at once is fine:
@@ -234,7 +240,7 @@ Below are the most commonly used building blocks. If you use a less common compo
 | `UI.Container` | Flex layout              | `direction`, `justify`, `align`, `gap`, `padding`, `margin`, `wrap`, `grow`, `shrink`, `basis` |
 | `UI.Fragment`  | Render without a wrapper | none                                                                                           |
 
-Note: numeric `padding` and `margin` are multiplied by 3px on the host side.
+Note: numeric `padding` and `margin` values are multiplied by 3px on the host side.
 
 ### Text and messages
 
@@ -258,15 +264,15 @@ Note: numeric `padding` and `margin` are multiplied by 3px on the host side.
 | `UI.Textarea`   | Multiline text | `value`, `placeholder`, `height`, `readonly`, `theme`        | `onEnter`                                         |
 | `UI.Select`     | Dropdown       | `value`, `options`, `disabled`, `theme`, `size`              | `onChange`                                        |
 | `UI.Checkbox`   | Checkbox       | `value`, `label`, `theme`, `disabled`                        | `onChange`                                        |
-| `UI.DatePicker` | Date/range     | `value`, `range`, `time`, `autoApply`, `theme`, `size`       | `onChange`                                        |
+| `UI.DatePicker` | Date or range  | `value`, `range`, `time`, `autoApply`, `theme`, `size`       | `onChange`                                        |
 | `UI.Files`      | File picker    | `selectMode`, `onlyImage`, `selectAfterUpload`               | `onChange`                                        |
 
 ### Modals and media
 
-| Component   | Purpose         | Key props                                                                      | Events                   |
-| ----------- | --------------- | ------------------------------------------------------------------------------ | ------------------------ |
-| `UI.Modal`  | Modal dialog    | `title`, `confirmText`, `cancelText`, `showOnStart`, `width`, `disableConfirm` | `onOnDone`, `onOnCancel` |
-| `UI.Iframe` | Embedded iframe | `src`, `title`, `width`, `height`                                              | none                     |
+| Component   | Purpose         | Key props                                                                      | Events               |
+| ----------- | --------------- | ------------------------------------------------------------------------------ | -------------------- |
+| `UI.Modal`  | Modal dialog    | `title`, `confirmText`, `cancelText`, `showOnStart`, `width`, `disableConfirm` | `onDone`, `onCancel` |
+| `UI.Iframe` | Embedded iframe | `src`, `title`, `width`, `height`                                              | none                 |
 
 ## 9. Debugging
 
@@ -279,25 +285,25 @@ Text('debug', { value: JSON.stringify(state) })
 
 If the UI is not reacting:
 
-- ensure the updated element has the same `mId` as in the initial render,
-- ensure the event name in props (for example `'save'`) matches the name used in `onEvent('save', ...)`,
-- ensure you call `update(...)` after changing state.
+- Ensure the updated node uses the same `mId` as in the initial render.
+- Ensure the event name in props (for example, `'save'`) matches the name used in `onEvent('save', ...)`.
+- Ensure you call `update(...)` after changing state.
 
 ## 10. Common pitfalls
 
-- Missing `mId` for elements you want to update.
+- Missing `mId` on nodes you want to update.
 - Changing `mId` between renders (the host cannot match nodes).
 - Trying to style via `style` (it will be stripped).
 - Typos in event names (`increment` vs `incement`).
-- Do not render your entire mod exclusively inside the `UI.Iframe` component. `UI.Iframe` is intended only for auxiliary flows (for example login, authorization, or informational screens). Mangose will not accept store mods whose full functionality lives solely inside an embedded iframe.
+- Do not render your entire mod exclusively inside the `UI.Iframe` component. `UI.Iframe` is intended only for auxiliary flows (for example, login, authorization, or informational screens). Mangose will not accept store mods whose full functionality lives solely inside an embedded iframe.
 
 ## 11. Publish a mod to the Mangose Store
 
-All store mods are hosted in a public GitHub repository. Adding a new mod or updating an existing one is done via Pull Request.
+All store mods are hosted in a public GitHub repository. To add a new mod (or update an existing one), open a Pull Request.
 
 ### Repository
 
-Repo: `Mangose/mods`.
+- `Mangose/mods` (GitHub: https://github.com/Mangose/mods)
 
 ### Add a new mod
 
@@ -309,20 +315,20 @@ Repo: `Mangose/mods`.
 Important:
 
 - The entry file must be named **`index.html`**.
-- Keep all mod files inside the mod folder (HTML, JS, CSS, assets).
-- Avoid linking to third party assets without a clear reason. Prefer assets committed to the repo.
+- Keep everything inside the mod folder (HTML, JS, CSS, assets).
+- Avoid linking to third party assets unless there is a clear reason. Prefer assets committed to the repo.
 
 3. Add an entry to:
 
 - `/mods/store.json`
 
-The entry should point to your mod folder and include basic metadata (name, description, author, version, etc., per the file schema).
+The entry should point to your mod folder and include basic metadata (name, description, author, version, and so on), following the schema in that file.
 
 4. Open a Pull Request to `Mangose/mods` with a short description:
 
-- what the mod does,
-- how to test it,
-- what changed (if this is an update).
+- What the mod does.
+- How to test it.
+- What changed (if this is an update).
 
 ### Update an existing mod
 
@@ -336,13 +342,13 @@ Updates follow the same flow as adding a new mod:
 
 We keep the store fast and reliable for everyone, so please follow these guidelines:
 
-- Use a simple, predictable structure (for example `index.html`, `assets/`, `styles/`, `scripts/`).
+- Use a simple, predictable structure (for example, `index.html`, `assets/`, `styles/`, `scripts/`).
 - Compress images and avoid shipping heavy exports.
-  - Prefer JPEG/WebP/AVIF when appropriate.
+  - Prefer JPEG, WebP, or AVIF when appropriate.
   - Keep resolution to what you actually need.
   - Avoid large PNG files unless transparency is required.
-- If you add video or other large files, explain why in the PR and consider a “light” alternative.
-- Ensure the mod works without additional host side dependencies. Everything required should live in the mod folder.
+- If you add video or other large files, explain why in the PR and consider a lighter alternative.
+- Ensure the mod works without additional host-side dependencies. Everything required should live in the mod folder.
 
 These rules help us maintain high quality and fast loading times across the store.
 
