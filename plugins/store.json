@@ -5,6 +5,7 @@
       friendlyName: 'Example Mod',
       description: 'This is example mangose mod'
       version: '1.0',
-      author: 'Magda',
+      author: 'Magda'
+    }
   ]
 }
