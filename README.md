@@ -24,6 +24,13 @@ This guide is for developers who want to build mods that run inside Mangose. It 
 > If you’re building your own mod, select **Empty Mod**. Next, open the mod in the new window and click the **gear icon** to open settings. From there, you can either:
 > Enter your GitHub repository, or paste a direct URL to a hosted mod (for example, a mod running on `localhost` during development).
 
+## Need help?
+
+If you get stuck or want feedback, join our Discord community:
+https://www.mangose.io/links/discord
+
+You can ask questions, share what you’re building, and get help from the Mangose team and other mod developers. It’s also the best place to suggest improvements to the Mods SDK, including new host API functions and events you’d like to see supported.
+
 ## 2. Hello world: a counter
 
 1. Create a file named `index.html`.
