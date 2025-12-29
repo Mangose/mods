@@ -44,11 +44,11 @@ You can ask questions, share what you’re building, and get help from the Mango
     <script type="module">
       import { MangoseMod } from 'https://cdn.mangose.app/mod-runtime.js'
 
+      // UI component factories
+      const { Container, Text, Button } = MangoseMod
+
       // Local state inside the mod
       const state = { count: 0 }
-
-      // UI component factories
-      const { Container, Text, Button } = MangoseMod.UI
 
       // Build the UI tree
       const buildUI = () =>
