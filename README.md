@@ -245,44 +245,44 @@ Below are the most commonly used building blocks. If you use a less common compo
 
 ### Layout
 
-| Component      | Purpose                  | Key props                                                                                      |
-| -------------- | ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `UI.Container` | Flex layout              | `direction`, `justify`, `align`, `gap`, `padding`, `margin`, `wrap`, `grow`, `shrink`, `basis` |
-| `UI.Fragment`  | Render without a wrapper | none                                                                                           |
+| Component   | Purpose                  | Key props                                                                                      |
+| ----------- | ------------------------ | ---------------------------------------------------------------------------------------------- |
+| `Container` | Flex layout              | `direction`, `justify`, `align`, `gap`, `padding`, `margin`, `wrap`, `grow`, `shrink`, `basis` |
+| `Fragment`  | Render without a wrapper | none                                                                                           |
 
 Note: numeric `padding` and `margin` values are multiplied by 3px on the host side.
 
 ### Text and messages
 
-| Component  | Purpose | Key props                                       |
-| ---------- | ------- | ----------------------------------------------- |
-| `UI.Text`  | Text    | `value`                                         |
-| `UI.Alert` | Message | `theme`, `hideOnStart`, `closeButton`, `margin` |
+| Component | Purpose | Key props                                       |
+| --------- | ------- | ----------------------------------------------- |
+| `Text`    | Text    | `value`                                         |
+| `Alert`   | Message | `theme`, `hideOnStart`, `closeButton`, `margin` |
 
 ### Actions
 
-| Component        | Purpose      | Key props                                       | Events                    |
-| ---------------- | ------------ | ----------------------------------------------- | ------------------------- |
-| `UI.Button`      | Button       | `theme`, `size`, `disabled`, `fill`, `selected` | `onClick`                 |
-| `UI.ColorPicker` | Color picker | `theme`, `size`                                 | `onColor`, `onBackground` |
+| Component     | Purpose      | Key props                                       | Events                    |
+| ------------- | ------------ | ----------------------------------------------- | ------------------------- |
+| `Button`      | Button       | `theme`, `size`, `disabled`, `fill`, `selected` | `onClick`                 |
+| `ColorPicker` | Color picker | `theme`, `size`                                 | `onColor`, `onBackground` |
 
 ### Forms
 
-| Component       | Purpose        | Key props                                                    | Events                                            |
-| --------------- | -------------- | ------------------------------------------------------------ | ------------------------------------------------- |
-| `UI.Input`      | Text input     | `value`, `placeholder`, `label`, `theme`, `size`, `readonly` | `onChange`, optionally `onKey_enter`, `onKey_esc` |
-| `UI.Textarea`   | Multiline text | `value`, `placeholder`, `height`, `readonly`, `theme`        | `onEnter`                                         |
-| `UI.Select`     | Dropdown       | `value`, `options`, `disabled`, `theme`, `size`              | `onChange`                                        |
-| `UI.Checkbox`   | Checkbox       | `value`, `label`, `theme`, `disabled`                        | `onChange`                                        |
-| `UI.DatePicker` | Date or range  | `value`, `range`, `time`, `autoApply`, `theme`, `size`       | `onChange`                                        |
-| `UI.Files`      | File picker    | `selectMode`, `onlyImage`, `selectAfterUpload`               | `onChange`                                        |
+| Component    | Purpose        | Key props                                                    | Events                                            |
+| ------------ | -------------- | ------------------------------------------------------------ | ------------------------------------------------- |
+| `Input`      | Text input     | `value`, `placeholder`, `label`, `theme`, `size`, `readonly` | `onChange`, optionally `onKey_enter`, `onKey_esc` |
+| `Textarea`   | Multiline text | `value`, `placeholder`, `height`, `readonly`, `theme`        | `onEnter`                                         |
+| `Select`     | Dropdown       | `value`, `options`, `disabled`, `theme`, `size`              | `onChange`                                        |
+| `Checkbox`   | Checkbox       | `value`, `label`, `theme`, `disabled`                        | `onChange`                                        |
+| `DatePicker` | Date or range  | `value`, `range`, `time`, `autoApply`, `theme`, `size`       | `onChange`                                        |
+| `Files`      | File picker    | `selectMode`, `onlyImage`, `selectAfterUpload`               | `onChange`                                        |
 
 ### Modals and media
 
-| Component   | Purpose         | Key props                                                                      | Events               |
-| ----------- | --------------- | ------------------------------------------------------------------------------ | -------------------- |
-| `UI.Modal`  | Modal dialog    | `title`, `confirmText`, `cancelText`, `showOnStart`, `width`, `disableConfirm` | `onDone`, `onCancel` |
-| `UI.Iframe` | Embedded iframe | `src`, `title`, `width`, `height`                                              | none                 |
+| Component | Purpose         | Key props                                                                      | Events               |
+| --------- | --------------- | ------------------------------------------------------------------------------ | -------------------- |
+| `Modal`   | Modal dialog    | `title`, `confirmText`, `cancelText`, `showOnStart`, `width`, `disableConfirm` | `onDone`, `onCancel` |
+| `Iframe`  | Embedded iframe | `src`, `title`, `width`, `height`                                              | none                 |
 
 ## 9. Debugging
 
@@ -305,7 +305,7 @@ If the UI is not reacting:
 - Changing `mId` between renders (the host cannot match nodes).
 - Trying to style via `style` (it will be stripped).
 - Typos in event names (`increment` vs `incement`).
-- Do not render your entire mod exclusively inside the `UI.Iframe` component. `UI.Iframe` is intended only for auxiliary flows (for example, login, authorization, or informational screens). Mangose will not accept store mods whose full functionality lives solely inside an embedded iframe.
+- Do not render your entire mod exclusively inside the `Iframe` component. `Iframe` is intended only for auxiliary flows (for example, login, authorization, or informational screens). Mangose will not accept store mods whose full functionality lives solely inside an embedded iframe.
 
 ## 11. Publish a mod to the Mangose Store
 
