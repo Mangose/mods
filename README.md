@@ -32,7 +32,7 @@ This guide is for developers who want to build mods on that runs inside Mangose.
 <html>
   <body>
     <script type="module">
-      import { MangoseMod } from 'https://cdn.mangose.dev/mod-runtime.js'
+      import { MangoseMod } from 'https://cdn.mangose.app/mod-runtime.js'
 
       // Local state inside the mod
       const state = { count: 0 }
