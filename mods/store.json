@@ -5,7 +5,7 @@
       "friendly-name": "Example Mod",
       "description": "This is example mangose mod",
       "version": "1.0",
-      "license": 'GPL',
+      "license": "GPL",
       "author": "Magda"
     }
   ]
