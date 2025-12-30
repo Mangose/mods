@@ -42,7 +42,7 @@ You can ask questions, share what you’re building, and get help from the Mango
 <html>
   <body>
     <script type="module">
-      import { MangoseMod } from 'https://cdn.mangose.app/mod-runtime.js'
+      import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
 
       // UI component factories
       const { Container, Text, Button } = MangoseMod
@@ -106,7 +106,7 @@ import { MangoseMod } from '@mangose/mod-runtime'
 If you prefer a single HTML file (as shown above), you can import from the CDN:
 
 ```js
-import { MangoseMod } from 'https://cdn.mangose.app/mod-runtime.js'
+import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
 ```
 
 ### Core APIs
@@ -121,6 +121,8 @@ import { MangoseMod } from 'https://cdn.mangose.app/mod-runtime.js'
   - Sends the initial UI tree to the host.
 - `MangoseMod.update(...nodes)`
   - Sends incremental UI updates. You can send multiple nodes in a single call.
+- `MangoseMod.remove(...ids)`
+  - Usuwa węzły o podanych `mId` wraz z ich potomkami.
 - `MangoseMod.<Component>([id], [props], [children])`
   - Factory functions for building UI nodes.
 
