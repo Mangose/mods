@@ -142,6 +142,12 @@ Container('box', [Text({ value: 'Child' })])
   - Opens a task in the main UI. Pass `null` to close the task view.
 - `MangoseMod.createTask(taskName, sectionId)`
   - Creates a task in a given section. Returns the operation result (for example, the created task object).
+- `MangoseMod.createSection(sectionName, [order])`
+  - Creates a section in the current collection. Returns the created section id.
+- `MangoseMod.updateSection(sectionId, elements)`
+  - Updates a section (for example, `{ name: 'In Progress' }`).
+- `MangoseMod.removeSection(sectionId)`
+  - Removes a section by id.
 - `MangoseMod.sections()`
   - Returns the list of sections for the current collection or view.
 - `MangoseMod.getTaskInSection(sectionId)`
@@ -247,15 +253,18 @@ Below are the most commonly used building blocks. If you use a less common compo
 | ----------- | ------------------------ | ---------------------------------------------------------------------------------------------- |
 | `Container` | Flex layout              | `direction`, `justify`, `align`, `gap`, `padding`, `margin`, `wrap`, `grow`, `shrink`, `basis` |
 | `Fragment`  | Render without a wrapper | none                                                                                           |
+| `Spacer`    | Fixed spacer             | `size`                                                                                         |
+| `Divider`   | Separator line           | `direction`, `thickness`, `length`, `margin`, `color`                                          |
 
 Note: numeric `padding` and `margin` values are multiplied by 3px on the host side.
 
 ### Text and messages
 
-| Component | Purpose | Key props                                       |
-| --------- | ------- | ----------------------------------------------- |
-| `Text`    | Text    | `value`                                         |
-| `Alert`   | Message | `theme`, `hideOnStart`, `closeButton`, `margin` |
+| Component | Purpose | Key props                                        |
+| --------- | ------- | ------------------------------------------------ |
+| `Text`    | Text    | `value`                                          |
+| `Alert`   | Message | `theme`, `hideOnStart`, `closeButton`, `msargin` |
+| `Spinner` | Loading | `size`                                           |
 
 ### Actions
 
@@ -263,6 +272,36 @@ Note: numeric `padding` and `margin` values are multiplied by 3px on the host si
 | ------------- | ------------ | ----------------------------------------------- | ------------------------- |
 | `Button`      | Button       | `theme`, `size`, `disabled`, `fill`, `selected` | `onClick`                 |
 | `ColorPicker` | Color picker | `theme`, `size`                                 | `onColor`, `onBackground` |
+| `Icon`        | Icon         | `type`, `source`, `fallback`, `color`, `border` | none                      |
+
+Available `Icon`:
+
+```
+calendar, star, star-fill, heart, heart-fill, check, check-double, xmark, plus,
+crown, minus, square, circle, eraser, trash, ghost, gear, gears, pen, people-group,
+person-man, person-woman, user, user-plus, studies, bulb, bulb-on, pin, document, shop,
+cash-register, frog, dog, cat, otter, dragon, house, umbrella-beach, mug-saucer,
+compass, building, car, truck, taxi, gas-pump, mask, plane, map-location, spa, brush,
+palette, lock, rocket, calculator, music, microphone, gift, code-merge, code, bug-slash,
+bug, gamepad, dice, chess-queen, shirt, football, scroll, ring, pizza-slice,
+apple-whole, cake-candles, paper-plane, fish-fins, lemon, burger, key, keyboard,
+bookmark, film, video, ticket, dolly, robot, brain, chart-line, briefcase, user-tie,
+house-laptop, laptop, coins, dollar-sign, desktop, computer, tablet, mobile, fish,
+kiwi-bird, horse, paw, dove, guitar, book, tree, leaf, seedling, mountain, sun,
+dumbbell, running, volleyball, basketball, bicycle, beer-mug-empty, wine-glass,
+cookie, ice-cream, carrot, ship, train, earth-europe, fire, add, archive, caret-up,
+caret-down, list-check, rotate, logout, comment, comments, plus-square,
+people-carry-box, chart-pie, square-poll-vertical, chart-area, bars, view-mode,
+design-mode, factory-mode, hashtag, camera, board-view, list-view, table-view, draw-view,
+text-view, canvas-view, embed-view, calendar-view, gallery-view, custom-view, button-view,
+id-card, ban, right-to-bracket, text-heading, text-font, text-bold, text-italic,
+text-underline, text-strike, text-align-left, text-align-center, text-align-right,
+text-list-ol, text-list-ul, text-link, text-link-slash, text-text-slash, quote, fill-drip,
+rotate-left, rotate-right, paintbrush, pencil, grip-lines, eye, eye-slash, eye-outline,
+envelope, wifi, error, spinner, window, user-ninja, magnifying, clone, off, toggle-off,
+toggle-on, help, arrow-start, arrow-end, image, wand, folder, folder-open, folder-plus,
+arrow-left, arrow-right, grip, dots, dots-vertical, database
+```
 
 ### Forms
 
@@ -274,6 +313,7 @@ Note: numeric `padding` and `margin` values are multiplied by 3px on the host si
 | `Checkbox`   | Checkbox       | `value`, `label`, `theme`, `disabled`                        | `onChange`                                        |
 | `DatePicker` | Date or range  | `value`, `range`, `time`, `autoApply`, `theme`, `size`       | `onChange`                                        |
 | `Files`      | File picker    | `selectMode`, `onlyImage`, `selectAfterUpload`               | `onChange`                                        |
+| `IconPicker` | Icon picker    | `value`, `readonly`                                          | `onChange`                                        |
 
 ### Modals and media
 
@@ -281,6 +321,7 @@ Note: numeric `padding` and `margin` values are multiplied by 3px on the host si
 | --------- | --------------- | ------------------------------------------------------------------------------ | -------------------- |
 | `Modal`   | Modal dialog    | `title`, `confirmText`, `cancelText`, `showOnStart`, `width`, `disableConfirm` | `onDone`, `onCancel` |
 | `Iframe`  | Embedded iframe | `src`, `title`, `width`, `height`                                              | none                 |
+| `Image`   | Image           | `src`, `alt`, `width`, `height`, `loading`                                     | none                 |
 
 ## 9. Debugging
 
