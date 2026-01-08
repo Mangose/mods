@@ -91,19 +91,7 @@ Key points:
 
 ### Installation
 
-If you build your mod as an npm project:
-
-```bash
-npm install @mangose/mod-runtime
-```
-
-Import the runtime:
-
-```js
-import { MangoseMod } from '@mangose/mod-runtime'
-```
-
-If you prefer a single HTML file (as shown above), you can import from the CDN:
+You can import from the CDN:
 
 ```js
 import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
