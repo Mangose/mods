@@ -101,6 +101,7 @@ import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
 
 - `MangoseMod.onReady(handler)`
   - Called when the host is ready. Render your initial UI tree here.
+  - Handler receives an object `{ baseUrl }` pointing to the mod asset base URL.
 - `MangoseMod.onEvent(event, handler)`
   - Subscribes to a single UI event. Use the event name without the `event:` prefix.
 - `MangoseMod.onEvents(items)`
@@ -120,6 +121,21 @@ Shorthand examples:
 Text({ value: 'No id' })
 Text('mod-status', { value: 'Status' })
 Container('box', [Text({ value: 'Child' })])
+```
+
+Example: use `baseUrl` to load assets:
+
+```js
+const { Container, Image } = MangoseMod
+
+const buildUI = (baseUrl) =>
+  Container('images-root', { direction: 'column', gap: 8 }, [
+    Image('logo', { src: `${baseUrl}/example.png`, width: 100, height: 100 }),
+  ])
+
+MangoseMod.onReady(({ baseUrl }) => {
+  MangoseMod.render(buildUI(baseUrl))
+})
 ```
 
 ## 4. Host API: functions available to mods
