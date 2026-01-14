@@ -199,6 +199,8 @@ const ui = () =>
       onChange: 'nameChanged',
     }),
     Text('preview', { value: `Typed: ${state.name}` }),
+    // Or
+    // Text('preview', `Typed: ${state.name}`),
   ])
 
 MangoseMod.onReady(() => {
