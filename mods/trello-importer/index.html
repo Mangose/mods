@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script type="module">
+      import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
+
+      const { Container, Text, Textarea, Button, Checkbox, Divider, Alert } = MangoseMod
+
+      const state = {
+        raw: '',
+        parsed: null, // { lists: [{id,name}], cards: [{id,name,idList}] }
+        selected: new Set(), // list ids
+        status: 'Paste your Trello board export JSON and click Parse.',
+        loading: false,
+        imported: 0,
+        failed: 0,
+      }
+
+      const ui = () =>
+        Container('root', { direction: 'column', gap: 10, padding: 4 }, [
+          Text('title', { value: 'Trello JSON Importer' }),
+
+          Alert('hint', {
+            theme: 'info',
+            hideOnStart: false,
+            closeButton: true,
+            value:
+              'In Trello: Board → … → Print and export → Export as JSON. Paste the JSON here.',
+          }),
+
+          Text('status', { value: state.status }),
+
+          Textarea('json', {
+            value: state.raw,
+            placeholder: 'Paste Trello export JSON here...',
+            height: 180,
+            onChange: 'rawChanged',
+          }),
+
+          Container('actions', { direction: 'row', gap: 8 }, [
+            Button('parse', { theme: 'secondary', onClick: 'parse', disabled: state.loading }, 'Parse'),
+            Button(
+              'import',
+              {
+                theme: 'primary',
+                onClick: 'import',
+                disabled: state.loading || !state.parsed || state.selected.size === 0,
+              },
+              'Import to Mangose',
+            ),
+          ]),
+
+          Divider('d1', { direction: 'horizontal', thickness: 1 }),
+
+          ...(state.parsed
+            ? [
+                Text('listsTitle', { value: 'Lists to import' }),
+                Container(
+                  'lists',
+                  { direction: 'column', gap: 6 },
+                  state.parsed.lists.map((l) =>
+                    Checkbox(`l:${l.id}`, {
+                      label: l.name,
+                      value: state.selected.has(l.id),
+                      onChange: `toggle:${l.id}`,
+                      disabled: state.loading,
+                    }),
+                  ),
+                ),
+                Divider('d2', { direction: 'horizontal', thickness: 1 }),
+                Text('progress', { value: `Imported: ${state.imported}, failed: ${state.failed}` }),
+              ]
+            : [Text('listsEmpty', { value: 'After parsing, you will see your Trello lists here.' })]),
+        ])
+
+      const setStatus = (v) => {
+        state.status = v
+        MangoseMod.update(Text('status', { value: state.status }))
+      }
+
+      const setLoading = (v) => {
+        state.loading = v
+        MangoseMod.update(
+          Button('parse', { theme: 'secondary', onClick: 'parse', disabled: state.loading }, 'Parse'),
+          Button(
+            'import',
+            {
+              theme: 'primary',
+              onClick: 'import',
+              disabled: state.loading || !state.parsed || state.selected.size === 0,
+            },
+            'Import to Mangose',
+          ),
+        )
+      }
+
+      const normalizeTrelloExport = (data) => {
+        // Trello export usually contains: { name, lists: [...], cards: [...] }
+        const lists = Array.isArray(data?.lists) ? data.lists : []
+        const cards = Array.isArray(data?.cards) ? data.cards : []
+
+        const cleanLists = lists
+          .filter((l) => l && l.id && l.name && !l.closed)
+          .map((l) => ({ id: String(l.id), name: String(l.name) }))
+
+        const cleanCards = cards
+          .filter((c) => c && c.id && c.idList && c.name && !c.closed)
+          .map((c) => ({
+            id: String(c.id),
+            idList: String(c.idList),
+            name: String(c.name),
+          }))
+
+        return { lists: cleanLists, cards: cleanCards }
+      }
+
+      const refreshToggleHandlers = () => {
+        const handlers = {}
+        for (const l of state.parsed.lists) {
+          handlers[`toggle:${l.id}`] = (payload) => {
+            const next = typeof payload === 'boolean' ? payload : payload?.value
+            if (next) state.selected.add(l.id)
+            else state.selected.delete(l.id)
+
+            MangoseMod.update(
+              Checkbox(`l:${l.id}`, {
+                label: l.name,
+                value: state.selected.has(l.id),
+                onChange: `toggle:${l.id}`,
+                disabled: state.loading,
+              }),
+              Button(
+                'import',
+                {
+                  theme: 'primary',
+                  onClick: 'import',
+                  disabled: state.loading || !state.parsed || state.selected.size === 0,
+                },
+                'Import to Mangose',
+              ),
+            )
+          }
+        }
+        MangoseMod.onEvents(handlers)
+      }
+
+      MangoseMod.onEvents({
+        rawChanged: (payload) => {
+          const next = typeof payload === 'string' ? payload : payload?.value
+          state.raw = next ?? ''
+        },
+
+        parse: () => {
+          try {
+            const data = JSON.parse(state.raw || '{}')
+            state.parsed = normalizeTrelloExport(data)
+            state.selected = new Set(state.parsed.lists.map((l) => l.id)) // select all by default
+            state.imported = 0
+            state.failed = 0
+
+            MangoseMod.update(
+              Container(
+                'lists',
+                { direction: 'column', gap: 6 },
+                state.parsed.lists.map((l) =>
+                  Checkbox(`l:${l.id}`, {
+                    label: l.name,
+                    value: state.selected.has(l.id),
+                    onChange: `toggle:${l.id}`,
+                    disabled: state.loading,
+                  }),
+                ),
+              ),
+              Text('listsTitle', { value: `Lists to import (${state.parsed.lists.length})` }),
+              Text('progress', { value: `Imported: 0, failed: 0` }),
+              Button(
+                'import',
+                { theme: 'primary', onClick: 'import', disabled: state.selected.size === 0 },
+                'Import to Mangose',
+              ),
+            )
+
+            refreshToggleHandlers()
+            setStatus(`OK. Lists: ${state.parsed.lists.length}, cards: ${state.parsed.cards.length}.`)
+          } catch (e) {
+            state.parsed = null
+            state.selected = new Set()
+            setStatus(`Parse error: ${e?.message ?? String(e)}`)
+          }
+        },
+
+        import: async () => {
+          if (!state.parsed) return setStatus('Parse the JSON first.')
+          if (state.selected.size === 0) return setStatus('Select at least one list.')
+
+          try {
+            setLoading(true)
+            setStatus('Loading sections from Mangose...')
+            const sections = await MangoseMod.sections()
+            const sectionIdByName = new Map((sections || []).map((s) => [s.name, s.id]))
+
+            const selectedLists = state.parsed.lists.filter((l) => state.selected.has(l.id))
+
+            // Ensure sections
+            setStatus('Creating sections...')
+            let order = (sections || []).length
+            const sectionIdByListId = new Map()
+            for (const l of selectedLists) {
+              if (sectionIdByName.has(l.name)) {
+                sectionIdByListId.set(l.id, sectionIdByName.get(l.name))
+              } else {
+                const id = await MangoseMod.createSection(l.name, order++)
+                sectionIdByListId.set(l.id, id)
+                sectionIdByName.set(l.name, id)
+              }
+            }
+
+            // Create tasks
+            setStatus('Creating tasks...')
+            state.imported = 0
+            state.failed = 0
+            MangoseMod.update(Text('progress', { value: `Imported: 0, failed: 0` }))
+
+            const cards = state.parsed.cards.filter((c) => sectionIdByListId.has(c.idList))
+
+            for (const c of cards) {
+              const sectionId = sectionIdByListId.get(c.idList)
+              try {
+                await MangoseMod.createTask(c.name, sectionId)
+                state.imported += 1
+              } catch {
+                state.failed += 1
+              }
+
+              if ((state.imported + state.failed) % 25 === 0) {
+                MangoseMod.update(
+                  Text('progress', { value: `Imported: ${state.imported}, failed: ${state.failed}` }),
+                )
+              }
+            }
+
+            MangoseMod.update(Text('progress', { value: `Imported: ${state.imported}, failed: ${state.failed}` }))
+            setStatus(`Done ✅ Imported: ${state.imported}, failed: ${state.failed}`)
+          } catch (e) {
+            setStatus(`Import error: ${e?.message ?? String(e)}`)
+          } finally {
+            setLoading(false)
+          }
+        },
+      })
+
+      MangoseMod.onReady(() => {
+        MangoseMod.render(ui())
+      })
+    </script>
+  </body>
+</html>
