@@ -42,40 +42,40 @@ You can ask questions, share what you’re building, and get help from the Mango
 <html>
   <body>
     <script type="module">
-      import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
+      import { MangoseMod } from "https://cdn.mangose.app/mangose/mod-runtime.js";
 
       // UI component factories
-      const { Container, Text, Button } = MangoseMod
+      const { Container, Text, Button } = MangoseMod;
 
       // Local state inside the mod
-      const state = { count: 0 }
+      const state = { count: 0 };
 
       // Build the UI tree
       const buildUI = () =>
-        Container('counter-root', { direction: 'column', gap: 8 }, [
-          Text('counter-title', { value: 'Mod counter' }),
-          Text('counter-value', { value: `Current value: ${state.count}` }),
+        Container("counter-root", { direction: "column", gap: 8 }, [
+          Text("counter-title", { value: "Mod counter" }),
+          Text("counter-value", { value: `Current value: ${state.count}` }),
           Button(
-            'counter-inc',
-            { theme: 'primary', onClick: 'increment' },
-            '+1',
+            "counter-inc",
+            { theme: "primary", onClick: "increment" },
+            "+1"
           ),
-        ])
+        ]);
 
       // Render only after the host signals readiness
       MangoseMod.onReady(() => {
-        MangoseMod.render(buildUI())
-      })
+        MangoseMod.render(buildUI());
+      });
 
       // Handle events coming back from the host
-      MangoseMod.onEvent('increment', () => {
-        state.count += 1
+      MangoseMod.onEvent("increment", () => {
+        state.count += 1;
 
         // Update only what changed
         MangoseMod.update(
-          Text('counter-value', { value: `Current value: ${state.count}` }),
-        )
-      })
+          Text("counter-value", { value: `Current value: ${state.count}` })
+        );
+      });
     </script>
   </body>
 </html>
@@ -94,7 +94,7 @@ Key points:
 You can import from the CDN:
 
 ```js
-import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
+import { MangoseMod } from "https://cdn.mangose.app/mangose/mod-runtime.js";
 ```
 
 ### Core APIs
@@ -118,24 +118,39 @@ import { MangoseMod } from 'https://cdn.mangose.app/mangose/mod-runtime.js'
 Shorthand examples:
 
 ```js
-Text({ value: 'No id' })
-Text('mod-status', { value: 'Status' })
-Container('box', [Text({ value: 'Child' })])
+Text({ value: "No id" });
+Text("mod-status", { value: "Status" });
+Container("box", [Text({ value: "Child" })]);
 ```
+
+How optional params are resolved:
+
+- If the first argument is a string, it becomes the `mId`.
+- `props` is optional; if missing or not an object, it defaults to `{}`.
+- `children` is optional; a single child is wrapped into an array.
+- `children` can be primitives (`string`, `number`, `boolean`, `null`) and they render as text.
+- If you plan to call `update(...)` for a node, that node must have a stable `mId`.
+- Some components still need essential props to render (for example, `Text` needs `value`, `Image` needs `src`).
+
+When string children work (and why):
+
+- The renderer always inserts `children` into the component's default slot. Components that expose a default slot will render them.
+- Works well with: `Container`, `Fragment`, `Text`, `Button`, `Alert`, `Modal`.
+- Components without a default slot ignore `children`, so use props instead (for example, `Text.value`, `Image.src`).
 
 Example: use `baseUrl` to load assets:
 
 ```js
-const { Container, Image } = MangoseMod
+const { Container, Image } = MangoseMod;
 
 const buildUI = (baseUrl) =>
-  Container('images-root', { direction: 'column', gap: 8 }, [
-    Image('logo', { src: `${baseUrl}/example.png`, width: 100, height: 100 }),
-  ])
+  Container("images-root", { direction: "column", gap: 8 }, [
+    Image("logo", { src: `${baseUrl}/example.png`, width: 100, height: 100 }),
+  ]);
 
 MangoseMod.onReady(({ baseUrl }) => {
-  MangoseMod.render(buildUI(baseUrl))
-})
+  MangoseMod.render(buildUI(baseUrl));
+});
 ```
 
 ## 4. Host API: functions available to mods
@@ -168,15 +183,15 @@ MangoseMod.onReady(({ baseUrl }) => {
 Set the event name as a string (without a prefix) on the component prop:
 
 ```js
-Button('save', { theme: 'primary', onClick: 'save' }, 'Save')
+Button("save", { theme: "primary", onClick: "save" }, "Save");
 ```
 
 Then subscribe in your mod using `MangoseMod.onEvent('save', handler)`:
 
 ```js
-MangoseMod.onEvent('save', () => {
-  console.log('Saved!')
-})
+MangoseMod.onEvent("save", () => {
+  console.log("Saved!");
+});
 ```
 
 ### Forms: `value` + `onChange`
@@ -189,31 +204,31 @@ Form components are controlled:
 Example:
 
 ```js
-const state = { name: '' }
+const state = { name: "" };
 
 const ui = () =>
-  Container('root', { direction: 'column', gap: 8 }, [
-    Input('name', {
+  Container("root", { direction: "column", gap: 8 }, [
+    Input("name", {
       value: state.name,
-      placeholder: 'Your name',
-      onChange: 'nameChanged',
+      placeholder: "Your name",
+      onChange: "nameChanged",
     }),
-    Text('preview', { value: `Typed: ${state.name}` }),
+    Text("preview", { value: `Typed: ${state.name}` }),
     // Or
     // Text('preview', `Typed: ${state.name}`),
-  ])
+  ]);
 
 MangoseMod.onReady(() => {
-  MangoseMod.render(ui())
-})
+  MangoseMod.render(ui());
+});
 
-MangoseMod.onEvent('nameChanged', (payload) => {
+MangoseMod.onEvent("nameChanged", (payload) => {
   // The host usually sends a primitive value or an object with `value`.
-  const next = typeof payload === 'string' ? payload : payload?.value
-  state.name = next ?? ''
+  const next = typeof payload === "string" ? payload : payload?.value;
+  state.name = next ?? "";
 
-  MangoseMod.update(Text('preview', { value: `Typed: ${state.name}` }))
-})
+  MangoseMod.update(Text("preview", { value: `Typed: ${state.name}` }));
+});
 ```
 
 ### Registering multiple events at once
@@ -222,14 +237,14 @@ You can register several handlers in one call:
 
 ```js
 MangoseMod.onEvents([
-  ['ping', () => console.log('ping')],
-  ['save', () => console.log('save')],
-])
+  ["ping", () => console.log("ping")],
+  ["save", () => console.log("save")],
+]);
 
 MangoseMod.onEvents({
   confirm: handleConfirm,
   cancel: handleCancel,
-})
+});
 ```
 
 ## 6. UI updates: simple rules that save time
@@ -240,7 +255,7 @@ MangoseMod.onEvents({
 - Sending multiple updates at once is fine:
 
 ```js
-MangoseMod.update(Text('a', { value: '...' }), Text('b', { value: '...' }))
+MangoseMod.update(Text("a", { value: "..." }), Text("b", { value: "..." }));
 ```
 
 ## 7. Limitations and safety
@@ -262,7 +277,8 @@ Below are the most commonly used building blocks. If you use a less common compo
 | `Spacer`    | Fixed spacer             | `size`                                                                                         |
 | `Divider`   | Separator line           | `direction`, `thickness`, `length`, `margin`, `color`                                          |
 
-Note: numeric `padding` and `margin` values are multiplied by 3px on the host side.
+Note: numeric `padding`, `margin`, and `size` values (Container/Spacer/Divider) are multiplied by 3px on the host side. String values are treated as CSS units (for example, `12px`, `1rem`, `50%`).
+
 
 ### Text and messages
 
@@ -335,7 +351,7 @@ arrow-left, arrow-right, grip, dots, dots-vertical, database
 - Temporarily render state in the UI:
 
 ```js
-Text('debug', { value: JSON.stringify(state) })
+Text("debug", { value: JSON.stringify(state) });
 ```
 
 If the UI is not reacting:
