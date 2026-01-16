@@ -190,6 +190,36 @@ MangoseMod.onReady(({ baseUrl }) => {
   - Returns metadata for the current collection (name, IDs, settings).
 - `MangoseMod.getProps()`
   - Returns collection properties
+- `MangoseMod.getTasks()`
+  - Returns all tasks for the current collection.
+- `MangoseMod.updateTask(taskId, elements)`
+  - Updates a task (for example, `{ title: "New title" }`).
+- `MangoseMod.addSnackbar(message, [type])`
+  - Shows a toast message. `type` can be `info` or `error`.
+
+### Storage
+
+Mods can store small string values in two places:
+
+- `MangoseMod.setStorage(key, value)` / `MangoseMod.getStorage(key)`
+  - Shared storage for a view element: visible to all users who can access the view, on all devices.
+- `MangoseMod.setLocalStorage(key, value)` / `MangoseMod.getLocalStorage(key)`
+  - Device-local storage: available only on the specific device/browser.
+
+Use `setStorage/getStorage` for shared mod state (for example, a team-wide filter, settings, or configuration that should be the same for everyone).
+Use `setLocalStorage/getLocalStorage` for personal or device-specific state (for example, drafts, UI preferences, or cached inputs).
+
+Example:
+
+```js
+const { setStorage, getStorage, setLocalStorage, getLocalStorage } = MangoseMod;
+
+await setStorage("filter", "open");
+const filter = await getStorage("filter");
+
+await setLocalStorage("draft", "Hello");
+const draft = await getLocalStorage("draft");
+```
 
 ## 5. Events: wiring clicks and form changes
 
