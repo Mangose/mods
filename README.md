@@ -14,6 +14,21 @@ This guide is for developers who want to build mods that run inside Mangose. It 
 - Your UI is not rendered directly in the mod’s DOM. Instead, you send a UI tree description built from Mangose components.
 - In practice: build UI with `MangoseMod.*` factories and only send updates for what changed.
 
+# Table of contents
+
+- [1. Prerequisites](#1-prerequisites)
+- [2. Hello world: a counter](#2-hello-world-a-counter)
+- [3. The `MangoseMod` runtime](#3-the-mangosemod-runtime)
+- [4. Host API: functions available to mods](#4-host-api-functions-available-to-mods)
+- [5. Events: wiring clicks and form changes](#5-events-wiring-clicks-and-form-changes)
+- [6. UI updates: simple rules that save time](#6-ui-updates-simple-rules-that-save-time)
+- [7. Limitations and safety](#7-limitations-and-safety)
+- [8. Component reference (quick)](#8-component-reference-quick)
+- [9. Debugging](#9-debugging)
+- [10. Common pitfalls](#10-common-pitfalls)
+- [11. Publish a mod to the Mangose Store](#11-publish-a-mod-to-the-mangose-store)
+- [12. Next steps](#12-next-steps)
+
 ## 1. Prerequisites
 
 - You can run a simple HTML page
@@ -174,7 +189,7 @@ MangoseMod.onReady(({ baseUrl }) => {
 - `MangoseMod.getCollection()`
   - Returns metadata for the current collection (name, IDs, settings).
 - `MangoseMod.getProps()`
-  - Returns view or module configuration properties exposed to the mod.
+  - Returns collection properties
 
 ## 5. Events: wiring clicks and form changes
 
@@ -279,14 +294,13 @@ Below are the most commonly used building blocks. If you use a less common compo
 
 Note: numeric `padding`, `margin`, and `size` values (Container/Spacer/Divider) are multiplied by 3px on the host side. String values are treated as CSS units (for example, `12px`, `1rem`, `50%`).
 
-
 ### Text and messages
 
-| Component | Purpose | Key props                                        |
-| --------- | ------- | ------------------------------------------------ |
-| `Text`    | Text    | `value`                                          |
-| `Alert`   | Message | `theme`, `hideOnStart`, `closeButton`, `msargin` |
-| `Spinner` | Loading | `size`                                           |
+| Component | Purpose | Key props                                       |
+| --------- | ------- | ----------------------------------------------- |
+| `Text`    | Text    | `value`                                         |
+| `Alert`   | Message | `theme`, `hideOnStart`, `closeButton`, `margin` |
+| `Spinner` | Loading | `size`                                          |
 
 ### Actions
 
