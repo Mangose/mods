@@ -57,7 +57,7 @@ You can ask questions, share what you’re building, and get help from the Mango
 <html>
   <body>
     <script type="module">
-      import { MangoseMod } from "https://cdn.mangose.app/mangose/mod-runtime.js";
+      import { MangoseMod } from "https://cdn.mangose.app/mod/mod-runtime.js";
 
       // UI component factories
       const { Container, Text, Button } = MangoseMod;
@@ -109,7 +109,7 @@ Key points:
 You can import from the CDN:
 
 ```js
-import { MangoseMod } from "https://cdn.mangose.app/mangose/mod-runtime.js";
+import { MangoseMod } from "https://cdn.mangose.app/mod/mod-runtime.js";
 ```
 
 ### Core APIs
