@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script type="module">
+      import { MangoseMod } from 'https://cdn.mangose.app/mod/mod-runtime.js'
+
+      const { Container, Text, Textarea, Button, Checkbox } = MangoseMod
+
+      const state = {
+        raw: '',
+        allowDuplicates: false,
+        isCreating: false,
+      }
+
+      const normalize = (s) => (s ?? '').trim()
+      const normalizeKey = (s) => normalize(s).toLowerCase()
+
+      const parseItems = (raw) =>
+        (raw ?? '')
+          .split(/,|\n/g)
+          .map((x) => normalize(x))
+          .filter(Boolean)
+
+      const uniqueByName = (items) => {
+        const seen = new Set()
+        const out = []
+        for (const name of items) {
+          const key = normalizeKey(name)
+          if (seen.has(key)) continue
+          seen.add(key)
+          out.push(name)
+        }
+        return out
+      }
+
+      const getTargetSectionId = async () => {
+        const sections = await MangoseMod.sections()
+        if (sections?.length) return sections[0]?.id ?? sections[0]?._id ?? null
+        return await MangoseMod.createSection('Imported Tasks')
+      }
+
+      const ui = () =>
+        Container('root', { direction: 'column', gap: 10, padding: 6 }, [
+          Text('title', { value: 'List → Tasks' }),
+
+          Textarea('input', {
+            value: state.raw,
+            placeholder: 'Buy milk\nPay rent, Call mom\nPlan trip',
+            height: '140px',
+            onChange: 'rawChanged',
+            readonly: state.isCreating,
+          }),
+
+          Checkbox('allow-dupes', {
+            value: state.allowDuplicates,
+            label: 'Allow duplicates',
+            onChange: 'allowDupesChanged',
+            disabled: state.isCreating,
+          }),
+
+          Button(
+            'btn-create',
+            {
+              theme: 'primary',
+              onClick: 'createTasks',
+              disabled: state.isCreating,
+            },
+            state.isCreating ? 'Creating...' : 'Create tasks',
+          ),
+        ])
+
+      MangoseMod.onReady(() => {
+        MangoseMod.render(ui())
+      })
+
+      MangoseMod.onEvents({
+        rawChanged: (payload) => {
+          const next =
+            typeof payload === 'string'
+              ? payload
+              : payload?.value ?? payload?.target?.value ?? ''
+
+          state.raw = next ?? ''
+        },
+
+        allowDupesChanged: (payload) => {
+          const next =
+            typeof payload === 'boolean'
+              ? payload
+              : typeof payload?.value === 'boolean'
+              ? payload.value
+              : typeof payload?.checked === 'boolean'
+              ? payload.checked
+              : typeof payload?.target?.checked === 'boolean'
+              ? payload.target.checked
+              : false
+
+          state.allowDuplicates = next
+
+          MangoseMod.update(
+            Checkbox('allow-dupes', {
+              value: state.allowDuplicates,
+              label: 'Allow duplicates',
+              onChange: 'allowDupesChanged',
+              disabled: state.isCreating,
+            }),
+          )
+        },
+
+        createTasks: async () => {
+          if (state.isCreating) return
+
+          const items = parseItems(state.raw)
+          if (items.length === 0) {
+            MangoseMod.addSnackbar('Nothing to create', 'error')
+            return
+          }
+
+          console.log('allowDuplicates', state.allowDuplicates)
+
+          let names = state.allowDuplicates ? items : uniqueByName(items)
+
+          if (!state.allowDuplicates) {
+            const tasks = (await MangoseMod.getTasks()) ?? []
+
+            const existing = new Set(
+              tasks
+                .map((t) => normalizeKey(t?.title ?? t?.name ?? ''))
+                .filter(Boolean),
+            )
+
+            names = names.filter((name) => !existing.has(normalizeKey(name)))
+          }
+
+          state.isCreating = true
+          MangoseMod.update(
+            Button(
+              'btn-create',
+              { theme: 'primary', onClick: 'createTasks', disabled: true },
+              'Creating...',
+            ),
+            Textarea('input', {
+              value: state.raw,
+              placeholder: 'Buy milk\nPay rent, Call mom\nPlan trip',
+              height: '140px',
+              onChange: 'rawChanged',
+              readonly: true,
+            }),
+            Checkbox('allow-dupes', {
+              value: state.allowDuplicates,
+              label: 'Allow duplicates',
+              onChange: 'allowDupesChanged',
+              disabled: true,
+            }),
+          )
+
+          let created = 0
+          let errors = 0
+
+          try {
+            const sectionId = await getTargetSectionId()
+
+            for (const name of names) {
+              try {
+                await MangoseMod.createTask(name, sectionId)
+                created += 1
+              } catch (e) {
+                errors += 1
+              }
+            }
+
+            MangoseMod.addSnackbar(
+              errors > 0
+                ? `Created ${created}. Errors: ${errors}`
+                : `Created ${created} task(s)!`,
+              errors > 0 ? 'error' : 'info',
+            )
+          } finally {
+            state.isCreating = false
+            MangoseMod.update(
+              Button(
+                'btn-create',
+                { theme: 'primary', onClick: 'createTasks', disabled: false },
+                'Create tasks',
+              ),
+              Textarea('input', {
+                value: state.raw,
+                placeholder: 'Buy milk\nPay rent, Call mom\nPlan trip',
+                height: '140px',
+                onChange: 'rawChanged',
+                readonly: false,
+              }),
+              Checkbox('allow-dupes', {
+                value: state.allowDuplicates,
+                label: 'Allow duplicates',
+                onChange: 'allowDupesChanged',
+                disabled: false,
+              }),
+            )
+          }
+        },
+      })
+    </script>
+  </body>
+</html>
