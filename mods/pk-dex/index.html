@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script type="module">
+      import { MangoseMod } from 'https://cdn.mangose.app/mod/mod-runtime.js'
+
+      const { Container, Text, Textarea, Button, Divider, Spacer, Image } =
+        MangoseMod
+
+      const API = 'https://pokeapi.co/api/v2'
+
+      const state = {
+        query: '',
+        isLoading: false,
+
+        // list
+        limit: 20,
+        offset: 0,
+        list: [],
+        listCount: 0,
+
+        // selected pokemon
+        selected: null,
+        selectedSpeciesText: '',
+      }
+
+      const safe = (v) => (v == null ? '' : String(v))
+      const normalize = (s) => safe(s).trim().toLowerCase()
+
+      const getPokemonIdFromUrl = (url) => {
+        // Example: https://pokeapi.co/api/v2/pokemon/25/
+        const parts = String(url ?? '')
+          .split('/')
+          .filter(Boolean)
+        return parts[parts.length - 1] // "25"
+      }
+
+      const fetchJson = async (url) => {
+        const res = await fetch(url)
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return await res.json()
+      }
+
+      const setLoading = (v) => {
+        state.isLoading = v
+
+        MangoseMod.update(
+          Button(
+            'btn-search',
+            {
+              theme: 'primary',
+              onClick: 'searchPokemon',
+              disabled: state.isLoading,
+            },
+            state.isLoading ? 'Loading...' : 'Search',
+          ),
+          Button(
+            'btn-prev',
+            {
+              theme: 'secondary',
+              onClick: 'prevPage',
+              disabled: state.isLoading || state.offset <= 0,
+            },
+            'Prev',
+          ),
+          Button(
+            'btn-next',
+            {
+              theme: 'secondary',
+              onClick: 'nextPage',
+              disabled: state.isLoading,
+            },
+            'Next',
+          ),
+          Textarea('search', {
+            value: state.query,
+            placeholder: 'Search by name or ID (e.g. pikachu / 25)',
+            height: '46px',
+            onChange: 'queryChanged',
+            readonly: state.isLoading,
+          }),
+        )
+      }
+
+      // base events (always available)
+      const registerBaseEvents = () => {
+        MangoseMod.onEvents({
+          queryChanged: (payload) => {
+            const next =
+              typeof payload === 'string'
+                ? payload
+                : payload?.value ?? payload?.target?.value ?? ''
+
+            state.query = next ?? ''
+          },
+
+          searchPokemon: async () => {
+            await loadPokemon(state.query)
+          },
+
+          prevPage: async () => {
+            if (state.offset <= 0) return
+            state.offset = Math.max(0, state.offset - state.limit)
+            await loadList()
+          },
+
+          nextPage: async () => {
+            state.offset = state.offset + state.limit
+            await loadList()
+          },
+        })
+      }
+
+      // pokemon open events (re-registered after each list fetch)
+      const registerPokemonOpenEvents = () => {
+        const events = {}
+
+        for (const pokemon of state.list) {
+          const id = getPokemonIdFromUrl(pokemon?.url)
+          const name = pokemon?.name ?? ''
+
+          events[`open-pokemon-${id}`] = async () => {
+            await loadPokemon(name)
+          }
+        }
+
+        MangoseMod.onEvents(events)
+      }
+
+      const loadList = async () => {
+        setLoading(true)
+
+        try {
+          const data = await fetchJson(
+            `${API}/pokemon?limit=${state.limit}&offset=${state.offset}`,
+          )
+
+          state.list = data?.results ?? []
+          state.listCount = data?.count ?? 0
+
+          // ✅ important: register events AFTER list is loaded
+          registerPokemonOpenEvents()
+
+          MangoseMod.update(
+            Text('list-meta', {
+              value: `Showing ${state.offset + 1}-${Math.min(
+                state.offset + state.limit,
+                state.listCount,
+              )} of ${state.listCount}`,
+            }),
+            renderList(),
+          )
+        } catch (e) {
+          MangoseMod.addSnackbar('Failed to load list from PokeAPI', 'error')
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      const loadPokemon = async (nameOrId) => {
+        const q = normalize(nameOrId)
+        if (!q) {
+          MangoseMod.addSnackbar('Type Pokémon name or ID', 'error')
+          return
+        }
+
+        setLoading(true)
+        state.selected = null
+        state.selectedSpeciesText = ''
+        MangoseMod.update(renderDetails())
+
+        try {
+          const p = await fetchJson(`${API}/pokemon/${encodeURIComponent(q)}`)
+          state.selected = p
+
+          // species flavor text (optional)
+          try {
+            const species = await fetchJson(p?.species?.url)
+            const entry =
+              (species?.flavor_text_entries ?? []).find(
+                (x) => x?.language?.name === 'en',
+              ) ?? null
+
+            state.selectedSpeciesText = entry?.flavor_text
+              ? String(entry.flavor_text).replace(/\f|\n|\r/g, ' ')
+              : ''
+          } catch {
+            state.selectedSpeciesText = ''
+          }
+
+          MangoseMod.update(renderDetails())
+        } catch (e) {
+          state.selected = null
+          state.selectedSpeciesText = ''
+          MangoseMod.update(renderDetails())
+          MangoseMod.addSnackbar('Pokémon not found', 'error')
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      // ✅ 2-column list + open-pokemon-${id} events
+      const renderList = () => {
+        const left = []
+        const right = []
+
+        for (let i = 0; i < state.list.length; i++) {
+          const pokemon = state.list[i]
+          const name = pokemon?.name ?? ''
+          const id = getPokemonIdFromUrl(pokemon?.url)
+
+          const btn = Button(
+            `poke-${id}`,
+            {
+              theme: 'secondary',
+              onClick: `open-pokemon-${id}`,
+            },
+            name,
+          )
+
+          if (i % 2 === 0) left.push(btn)
+          else right.push(btn)
+        }
+
+        return Container('pokemon-list', { direction: 'row', gap: 8 }, [
+          Container('pokemon-col-left', { direction: 'column', gap: 6 }, left),
+          Container(
+            'pokemon-col-right',
+            { direction: 'column', gap: 6 },
+            right,
+          ),
+        ])
+      }
+
+      const renderDetails = () => {
+        if (!state.selected) {
+          return Container('details', { direction: 'column', gap: 8 }, [
+            Text('details-title', {
+              value: 'Select a Pokémon to see details.',
+            }),
+          ])
+        }
+
+        const p = state.selected
+        const name = p?.name ?? ''
+        const id = p?.id ?? ''
+
+        const sprite =
+          p?.sprites?.other?.['official-artwork']?.front_default ??
+          p?.sprites?.front_default ??
+          ''
+
+        const types = (p?.types ?? [])
+          .map((t) => t?.type?.name)
+          .filter(Boolean)
+          .join(', ')
+
+        const abilities = (p?.abilities ?? [])
+          .map((a) => a?.ability?.name)
+          .filter(Boolean)
+          .join(', ')
+
+        const stats = (p?.stats ?? [])
+          .map((s) => `${s?.stat?.name}: ${s?.base_stat}`)
+          .filter((x) => !x.includes('undefined'))
+          .join(', ')
+
+        return Container('details', { direction: 'column', gap: 8 }, [
+          Text('details-title', `${name} (#${id})`),
+
+          sprite
+            ? Image('sprite', {
+                src: sprite,
+                width: 220,
+                height: 220,
+                fit: 'contain',
+                radius: 14,
+              })
+            : Text('sprite', { value: 'No image available' }),
+
+          Divider('d2', { direction: 'horizontal', thickness: 1, margin: 4 }),
+
+          Text('types', `Types: ${types || '-'}`),
+          Text('abilities', `Abilities: ${abilities || '-'}`),
+          Text('stats', `Stats: ${stats || '-'}`),
+
+          state.selectedSpeciesText
+            ? Text('flavor', { value: `Entry: ${state.selectedSpeciesText}` })
+            : Spacer('spx', { size: 1 }),
+        ])
+      }
+
+      const ui = () =>
+        Container('root', { direction: 'column', gap: 10, padding: 6 }, [
+          Text('title', { value: 'Pokedex' }),
+          Text('desc', { value: 'Powered by PokeAPI (pokeapi.co)' }),
+
+          Divider('d1', { direction: 'horizontal', thickness: 1, margin: 6 }),
+
+          Container(
+            'search-row',
+            { direction: 'row', gap: 10, align: 'center' },
+            [
+              Textarea('search', {
+                value: state.query,
+                placeholder: 'Search by name or ID (e.g. pikachu / 25)',
+                height: '46px',
+                onChange: 'queryChanged',
+                readonly: state.isLoading,
+              }),
+              Button(
+                'btn-search',
+                {
+                  theme: 'primary',
+                  onClick: 'searchPokemon',
+                  disabled: state.isLoading,
+                },
+                state.isLoading ? 'Loading...' : 'Search',
+              ),
+            ],
+          ),
+
+          Container('paging', { direction: 'row', gap: 10, align: 'center' }, [
+            Button(
+              'btn-prev',
+              {
+                theme: 'secondary',
+                onClick: 'prevPage',
+                disabled: state.isLoading || state.offset <= 0,
+              },
+              'Prev',
+            ),
+            Button(
+              'btn-next',
+              {
+                theme: 'secondary',
+                onClick: 'nextPage',
+                disabled: state.isLoading,
+              },
+              'Next',
+            ),
+            Text('list-meta', { value: '' }),
+          ]),
+
+          Divider('d3', { direction: 'horizontal', thickness: 1, margin: 6 }),
+
+          Container('content', { direction: 'row', gap: 12 }, [
+            Container('left', { direction: 'column', gap: 6 }, [
+              Text('list-title', { value: 'Pokémon list' }),
+              renderList(),
+            ]),
+            Container('right', { direction: 'column', gap: 6 }, [
+              Text('details-label', { value: 'Details' }),
+              renderDetails(),
+            ]),
+          ]),
+        ])
+
+      MangoseMod.onReady(async () => {
+        registerBaseEvents()
+        MangoseMod.render(ui())
+        await loadList()
+      })
+    </script>
+  </body>
+</html>
