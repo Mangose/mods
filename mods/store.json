@@ -15,14 +15,6 @@
       "version": "1.0",
       "license": "MIT",
       "author": "Mangose"
-    },
-    {
-      "name": "example-mod",
-      "friendly-name": "Example Mod",
-      "description": "This is example mangose mod",
-      "version": "1.0",
-      "license": "GPL",
-      "author": "Mangose"
     }
   ]
 }
