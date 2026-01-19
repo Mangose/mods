@@ -15,6 +15,14 @@
       "version": "1.0",
       "license": "MIT",
       "author": "Mangose"
+    },
+    {
+      "name": "pk-dex",
+      "friendly-name": "Pokedex",
+      "description": "Find Pokemon in Mangose",
+      "version": "1.0",
+      "license": "MIT",
+      "author": "Mangose"
     }
   ]
 }
