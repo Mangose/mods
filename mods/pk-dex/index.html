@@ -142,12 +142,13 @@
           registerPokemonOpenEvents()
 
           MangoseMod.update(
-            Text('list-meta', {
-              value: `Showing ${state.offset + 1}-${Math.min(
+            Text(
+              'list-meta',
+              `Showing ${state.offset + 1}-${Math.min(
                 state.offset + state.limit,
                 state.listCount,
               )} of ${state.listCount}`,
-            }),
+            ),
             renderList(),
           )
         } catch (e) {
@@ -235,9 +236,7 @@
       const renderDetails = () => {
         if (!state.selected) {
           return Container('details', { direction: 'column', gap: 8 }, [
-            Text('details-title', {
-              value: 'Select a Pokémon to see details.',
-            }),
+            Text('details-title', 'Select a Pokémon to see details.'),
           ])
         }
 
@@ -276,7 +275,7 @@
                 fit: 'contain',
                 radius: 14,
               })
-            : Text('sprite', { value: 'No image available' }),
+            : Text('sprite', 'No image available'),
 
           Divider('d2', { direction: 'horizontal', thickness: 1, margin: 4 }),
 
@@ -285,15 +284,15 @@
           Text('stats', `Stats: ${stats || '-'}`),
 
           state.selectedSpeciesText
-            ? Text('flavor', { value: `Entry: ${state.selectedSpeciesText}` })
+            ? Text('flavor', `Entry: ${state.selectedSpeciesText}`)
             : Spacer('spx', { size: 1 }),
         ])
       }
 
       const ui = () =>
         Container('root', { direction: 'column', gap: 10, padding: 6 }, [
-          Text('title', { value: 'Pokedex' }),
-          Text('desc', { value: 'Powered by PokeAPI (pokeapi.co)' }),
+          Text('title', 'Pokedex'),
+          Text('desc', 'Powered by PokeAPI (pokeapi.co)'),
 
           Divider('d1', { direction: 'horizontal', thickness: 1, margin: 6 }),
 
@@ -339,18 +338,18 @@
               },
               'Next',
             ),
-            Text('list-meta', { value: '' }),
+            Text('list-meta', ''),
           ]),
 
           Divider('d3', { direction: 'horizontal', thickness: 1, margin: 6 }),
 
           Container('content', { direction: 'row', gap: 12 }, [
             Container('left', { direction: 'column', gap: 6 }, [
-              Text('list-title', { value: 'Pokémon list' }),
+              Text('list-title', 'Pokémon list'),
               renderList(),
             ]),
             Container('right', { direction: 'column', gap: 6 }, [
-              Text('details-label', { value: 'Details' }),
+              Text('details-label', 'Details'),
               renderDetails(),
             ]),
           ]),
