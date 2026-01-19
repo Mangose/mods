@@ -9,6 +9,14 @@
       "author": "Mangose"
     },
     {
+      "name": "quick-task-importer",
+      "friendly-name": "Quick Task Importer",
+      "description": "Paste a comma or line-separated list to instantly create tasks in Mangose",
+      "version": "1.0",
+      "license": "MIT",
+      "author": "Mangose"
+    },
+    {
       "name": "example-mod",
       "friendly-name": "Example Mod",
       "description": "This is example mangose mod",
